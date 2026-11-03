@@ -31,6 +31,21 @@ class GastosController extends GetxController {
   final RxBool desdeCache = false.obs;
   String get ultimaSincronizacion => _repository.ultimaSincronizacion;
 
+  /// Categoría elegida en el filtro de la pantalla; `null` significa «Todas».
+  final RxnString categoriaSeleccionada = RxnString();
+
+  /// Categorías que aparecen en los gastos cargados, en orden de aparición.
+  List<String> get categoriasEnGastos => gastos.map((g) => g.categoria).toSet().toList();
+
+  /// Los gastos que muestra la lista según el filtro elegido.
+  List<Gasto> get gastosFiltrados {
+    final categoria = categoriaSeleccionada.value;
+    if (categoria == null) return gastos;
+    return gastos.where((g) => g.categoria == categoria).toList();
+  }
+
+  void seleccionarCategoria(String? categoria) => categoriaSeleccionada.value = categoria;
+
   @override
   void onInit() {
     super.onInit();
@@ -74,6 +89,11 @@ class GastosController extends GetxController {
     gastos.value = lista;
     totalEnServidor.value = lista.length;
     desdeCache.value = cache;
+    // Por qué: si se borró el último gasto de la categoría filtrada, se vuelve
+    // a «Todas» para que la lista no quede vacía sin motivo.
+    if (!categoriasEnGastos.contains(categoriaSeleccionada.value)) {
+      categoriaSeleccionada.value = null;
+    }
   }
 
   Future<void> cargarCategorias() async {
@@ -126,6 +146,7 @@ class GastosController extends GetxController {
     await _repository.vaciar();
     gastos.clear();
     categorias.clear();
+    categoriaSeleccionada.value = null;
     totalEnServidor.value = 0;
     desdeCache.value = false;
     mensajeError.value = '';
