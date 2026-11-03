@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/auth_controller.dart';
-// Solo los usa el bloque comentado del Paso 4.
-// ignore: unused_import
 import '../controllers/gastos_controller.dart';
-// ignore: unused_import
 import '../services/ai_assistant_service.dart';
 import '../services/api_exception.dart';
 import '../theme/app_theme.dart';
@@ -48,14 +45,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
       // Por qué: el asistente solo necesita totales, no cada gasto. Se pide el
       // resumen por categoría al backend (con el token de tu sesión) y se envía
       // al proxy junto con la pregunta. La respuesta se muestra en pantalla.
-      // TODO(sesion-09) Paso 4: descomenta las 3 líneas de abajo (conectar con el proxy).
       final resumen = await Get.find<GastosController>().obtenerResumen();
       final r = await Get.find<AiAssistantService>().preguntar(consulta, resumen);
       setState(() => _respuesta = r.respuesta);
 
       // Por qué: si la IA propone registrar un gasto, la app NO lo hace sola.
       // Muestra un diálogo y solo si la persona acepta se llama al backend.
-      // TODO(sesion-09) Paso 5: descomenta la línea de abajo (pedir confirmación).
       if (r.accion != null) await confirmarAccion(r.accion!);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.mensaje);
@@ -134,7 +129,6 @@ class _AssistantScreenState extends State<AssistantScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          // TODO(sesion-09) OPCIONAL Paso 9: descomenta las 17 líneas de abajo (preguntas sugeridas).
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.sm,
